@@ -1,0 +1,11 @@
+# linux/arch/arm/mach-zmp110x/Kconfig
+#
+# Licensed under GPLv2
+
+# Machine support
+
+config MACH_ZMP110X
+	bool "ZLGMCU ZMP1107_EVB Platform support"
+	depends on ARCH_ZMP
+	help
+	  Support for zmp110x

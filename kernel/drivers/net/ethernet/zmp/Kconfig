@@ -1,0 +1,10 @@
+#
+# ZMP device configuration
+#
+
+config NET_ZMP
+	tristate "ZMP devices"
+	default y
+	depends on ARCH_ZMP
+	---help---
+	  If you have a ZMP network (Ethernet) card, say Y.

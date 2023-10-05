@@ -1,0 +1,210 @@
+/*
+ * ZMP1107_EVB board dts
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/dts-v1/;
+#include "zmp1107.dtsi"
+#include "zmp110x_lcd.dtsi"
+#include "zmp110x_spi_nor.dtsi"
+#include "zmp110x_evb.dtsi"
+
+/ {
+    compatible = "zlgmcu,zmp110x";
+    model = "ZMP1107_EVB";
+	version = "V1.0.00";
+
+    mmc2_pwrseq: usdhc2_pwrseq {
+        pinctrl-names = "default";
+        pinctrl-0 = <&sdio_wifi_rst_pins>;
+        compatible = "mmc-pwrseq-simple";
+        reset-gpios = <&gpio 98 1>;
+		post-power-on-delay-ms = <120>;
+        status = "disable";
+    };
+
+    //使用ion的DMA区部分内存模拟块设备
+    ramdisk:ramdisk{
+        compatible = "zlgmcu,zmp110x-ramdisk";
+        memory-region = <&dma_reserved>;
+        status = "disable";
+    };
+
+    gpiokeys {
+        compatible = "gpio-keys";
+        //pinctrl-names = "default";
+        //pinctrl-0 = <&gpio_keys>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+        autorepeat;
+        status = "disable";
+        button@21 {
+            label = "GPIO Key UP";
+            linux,code = <103>;
+            //gpios = <&gpio 28 1>;
+        };
+    };
+};
+
+/*--------------------------------------ZMP110x 片内外设-----------------------------------------*/
+/* MIPI LCD背光：LCD15，与RGB LCD IO冲突 */
+&pwm4 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pwm4_pins>;
+    period-ns = <1000000>;
+    duty-ns = <1000000>;
+    pwm-enable = <1>;
+    status = "okay";
+};
+
+/*-----------------------------------------------板载外设------------------------------------------------*/
+
+/* data[0:1]线和csi的[RST:EN]引脚复用
+   没有CD脚：使用clk做卡检测时需要短接JP1
+ */
+&mmc1 {
+    bus-width = <0x4>;
+    max-frequency = <120000000>;
+    non-removable;
+    //cd_clk;
+    cap-sd-highspeed;
+    pinctrl-names = "default";
+    pinctrl-0 = <&mci1_pins>;
+    status = "okay";
+};
+
+//WIFI SLOT：底板默认不焊接
+&mmc2 {
+    #address-cells = <1>;
+	#size-cells = <0>;
+    bus-width = <0x4>;
+    max-frequency = <50000000>;
+    non-removable;
+    cap-sd-highspeed;
+    no-1-8-v;
+    mmc-pwrseq = <&mmc2_pwrseq>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&mci2_pins>;
+    status = "disabled";
+
+    brcmf: wifi@1 {
+        reg = <1>;
+        brcm,drive-strength = <10>;
+        compatible = "brcm,bcm4329-fmac";
+    };
+};
+
+&i2c0 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&i2c0_pins>;
+
+    clock-frequency = <312000>;
+    //clock-frequency = <117000>;
+    sda-delay = <100>;
+    status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+        
+    //MIPI LCD触摸屏
+    gt911@14 {
+	    compatible = "goodix,gt911";
+	    reg = <0x14>;
+	    pinctrl-names = "default";
+        pinctrl-0 = <&gt911_pins>;
+        irq-gpio = <&gpio 71 1>;
+        reset-gpio = <&gpio 73 1>;
+        interrupts = <71 2>;
+        interrupt-parent = <&gpio>;
+        status = "okay";
+	};
+};
+
+&lcdc {
+    pinctrl-names = "default";
+    pinctrl-0 = <&lcd_reset_pins>; //<&lcd_pins>,<&lcd_reset_pins>; //lcd_pins for rgb lcd, lcd_reset_pins only for mipi lcd
+    reset-pins = <&gpio 72 1>; //only for mipi lcd
+    
+    lcd-logo-width = <570>;
+    lcd-logo-height = <212>;
+    //[fmt1:fmt0] 00 16bits input(RGB565 or BGR565)
+    //[fmt1:fmt0] 01 24bits input(RGB888 or BGR888)
+    //[fmt1:fmt0] 10 or 11 32bits input(ARGB888 ABGR888 RGBA888 BGRA888)
+    lcd-logo-fmt0 = <1>;
+    lcd-logo-fmt1 = <0>;
+    lcd-logo-rgb-seq = <1>; //0 for BGR, 1 for RGB  -> output seq ;use for framebuffer rgbseq
+    lcd-rgb-bg-color = <0xffffffff>; //bg color: white
+    lcd-fb-type = <0>; //0:single buffer; 1:double buffer
+
+    status = "okay";
+};
+
+
+// &jd9366 {
+//      status = "okay";
+// };
+
+&gh8555bl {
+    status = "okay";
+};
+
+&gpio {
+    /* zmp,function sharepin func index according to table 2-1 sharepin-list */
+    /* index: 0: PIN default func, 1: FUNCTION1, 2: FUNCTION2, 3: FUNCTION3, 4: FUNCTION4 */
+    /* zmp,pull config value bit[31:24]--slew rate, bit[23:16]--ie, bit[15:8]--drive, bit[7:0]--pupd config */
+    /* bit[31:24]--slew rate, 0: slow, 1: fast */
+    /* bit[23:16]--ie, input enable, 0: disable, 1: enable */
+    /* bit[15:8]--drive, drive strength, 4levels value: 0x0-0x3 */
+    /* bit[7:0]--bit[7]: open drain 0:disable, 1:enable (only for gpio31/32);
+				pupd config, bit[6:4] 1:enable/ 0:disable, bit[3:0] 0:select PU /1:select PD */   
+     
+    pwm4_pins: pwm4_pins {
+        zmp,pins = <90>;
+        zmp,function = <2>;
+        zmp,pull = <0x01011110>;
+    };
+
+    sdio_wifi_rst_pins:mmc_power_pins{
+        zmp,pins = <98>;
+	    zmp,function = <0>;
+        zmp,pull = <0x01010310>;
+    };
+
+    gt911_pins: gt9112_pins {
+        zmp,pins = <71 73>;
+        zmp,function = <0>;
+        zmp,pull = <0x01010000 0x01000311>;//71->INT:浮空输入，73->RST:下拉输出
+    };
+
+    i2c0_pins: i2c0_pins {
+        zmp,pins = <31 32>;
+        zmp,function = <1>;
+        zmp,pull = <0x01010380>;/* i2c0的引脚改为开漏输出 */
+    };
+
+    mci1_pins: mci1_pins {
+        zmp,pins = <43 44 45 46 47 48>;
+        zmp,function = <1>;
+        zmp,pull = <0x10010 0x10000 0x10010 0x10010 0x10010 0x10010>; /* 4 line */
+    };
+
+    mci2_pins: mci2_pins {
+        zmp,pins = <91 92 93 94 95 96>;
+        zmp,function = <2 2 3 3 3 3>;
+        zmp,pull = <0x01010010 0x01010010 0x01010010 0x01010010 0x01010010 0x01010010>;
+    };
+
+    lcd_reset_pins: lcd_reset_pins {
+	    zmp,pins = <72>;
+	    zmp,function = <0>;
+        zmp,pull = <0x01000310>;
+    };
+};

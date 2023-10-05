@@ -1,0 +1,222 @@
+/*
+ * ZMP1107_EVB board common dtsi
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/ {
+    
+    leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&run_led_pins>;
+        status = "okay";
+		led0: cpu {
+			label = "cpu";
+			gpios = <&gpio 3 1>;
+			default-state = "on";
+			linux,default-trigger = "heartbeat";
+		};
+	};
+    
+};
+
+/*--------------------------------------ZMP110x 片内外设-----------------------------------------*/
+&dac {
+    pinctrl-names = "default";
+    pinctrl-0 = <&speak_pins>;
+    /* 
+    ** speak-down,linein-detect,hp-mute,hp-detect
+    ** 1 means enable these four function
+    ** 0 means disable these four function
+    */
+    speak-down = <1>;
+    linein-detect = <0>;
+    hp-mute = <0>;
+    hp-detect = <0>;
+    speak-gpios = <&gpio 97 1>;
+    /*the level of speak-gpios votage for power on audio: 0=low, 1=high*/
+    speak-gpios-en = <1>;  
+    status = "okay";
+};
+
+&encrypt{
+   /*
+    * encrypt-mode
+    * 0 = CRYPTO_SINGLE_GROUP_MODE ; 1 = CRYPTO_MULTI_GROUP_MODE
+    */
+    encrypt-mode = <1>;
+    status = "okay";
+};
+
+&gui {
+    status = "okay";
+};
+
+&rtc {
+	/*
+	 * rtc osc_source_select, 1 means INTERNAL RC OSC, 0 means EXTERNAL XTAL
+	 * if internal RC OSC is used to generate 32KH,time adjustment should be setting.(basic unit: ms)
+	 */
+	osc-select = <0>;
+	//adjust-time = <120000>;
+	status = "okay";
+};
+
+&saradc{
+    /* SAR ADC VREF selection
+    * 0:To select AVCC 3.3V as VREF for SAR ADC.
+    * 1:To select 3.0V generated from BGR as VREF for SAR ADC.
+    */
+    vref-select = <0>;
+    /*
+    * 0:To disable BAT voltage divider. 
+    * 1:To enable BAT voltage divider divided by 2.
+    */
+    battery-divider = <1>;
+    /*
+    * Sampling number
+    * Read the sampling data for N times and then calculate the average value.
+    * N ranges from 1 to 7.
+    */
+     sampling-num = <3>;
+     status = "okay";
+};
+
+&uart0 {
+    pinctrl-names = "default";
+	pinctrl-0 = <&uart0_pins>;
+    status = "okay";
+};
+
+&usb {
+    status = "okay"; 
+};
+
+&vdecoder {
+    status = "okay";
+};
+
+&vencoder {
+    status = "okay";
+};
+
+&watchdog {
+	/*max feed dog time = 357s, default setting time = 10s. */
+    def_heartbeat = <10>;
+    status = "okay";
+};
+
+/*-----------------------------------------------板载外设------------------------------------------------*/
+&mmc0 {
+    bus-width = <0x8>;
+    max-frequency = <120000000>;
+    non-removable;
+    cap-mmc-highspeed;
+    pinctrl-names = "default";
+    pinctrl-0 = <&mci0_pins>;
+    status = "okay";
+};
+
+&spi0 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&spiflash_pins>;
+    cs-gpios = <&gpio 12 1>;
+    spi-bus-frequency = <80000000>;
+    /*
+     * cap-spi-highspeed;
+     * if defined, means high speed controller(Maximum 80M/s);
+     * if not, means normal speed controller(below 60M/s)
+     */
+    cap-spi-highspeed;
+    status = "okay";
+};
+
+&spif0 {
+	/* spi flash data bus width:
+	** 1 means 1 wire mode.
+	** 2 means 2 wire mode
+	** 4 means 4 wire mode.
+	** default: 4 wire mode.
+	**/
+	bus-width = <4>;
+	status = "okay";
+};
+
+&is25lp0512 {
+    status = "okay";
+};
+
+&is25lp064 {
+    status = "okay";
+};
+
+&ethernet {
+    pinctrl-names = "default";
+    pinctrl-0 = <&ethernet_pins_rmii &phy_reset_pins>;
+    reset-gpios = <&gpio 76 1>;
+    // mac-address = [00 04 9F 01 1B B0];
+    status = "okay";
+};
+
+&gpio {
+    /* zmp,function sharepin func index according to table 2-1 sharepin-list */
+    /* index: 0: PIN default func, 1: FUNCTION1, 2: FUNCTION2, 3: FUNCTION3, 4: FUNCTION4 */
+    /* zmp,pull config value bit[31:24]--slew rate, bit[23:16]--ie, bit[15:8]--drive, bit[7:0]--pupd config */
+    /* bit[31:24]--slew rate, 0: slow, 1: fast */
+    /* bit[23:16]--ie, input enable, 0: disable, 1: enable */
+    /* bit[15:8]--drive, drive strength, 4levels value: 0x0-0x3 */
+    /* bit[7:0]--bit[7]: open drain 0:disable, 1:enable (only for gpio31/32);
+				pupd config, bit[6:4] 1:enable/ 0:disable, bit[3:0] 0:select PU /1:select PD */ 
+
+
+    ethernet_pins_rmii: ethernet_pins_rmii {
+		zmp,pins 		= <10 11 13 14 15 19 20 23 24 49>;
+        zmp,function 	= <1>;
+        zmp,pull = <0x01010011 0x01010010 0x01010011 0x01010011 0x01010011 0x01010011 0x01010011 0x01010011 0x01010011 0x01010110>;
+    };
+
+    mci0_pins: mci0_pins {
+        zmp,pins = <33 34 35 36 37 38 39 40 41 42>;
+        zmp,function = <1>;
+        zmp,pull = <0x10010 0x10010 0x10010 0x10010 0x10010 0x10010 0x10010 0x10010 0x10010 0x10010>;/* 8 line */ 
+    };
+
+	phy_reset_pins: phy_reset_pins {
+		zmp,pins = <76>;		
+	    zmp,function = <0>;
+        zmp,pull = <0x01000010>;
+    };
+
+    run_led_pins: run_led_pins {
+	    zmp,pins = <3>;
+	    zmp,function = <0>;
+        zmp,pull = <0x01000310>;/* 上拉输出 */
+    };
+
+    spiflash_pins: spiflash_pins {
+        zmp,pins = <12 67 68 69 70>; /* 4 LINE mode, 12 is spi nor cs*/
+        zmp,function = <1 0 0 0 0>;
+        zmp,pull = <0x01010010>;
+    };
+
+    speak_pins: speak_pins {
+        zmp,pins = <97>; 
+        zmp,function = <0>;
+        zmp,pull = <0x01010010>;
+    };
+
+    uart0_pins: uart0_pins {
+        zmp,pins = <1 2>;
+        zmp,function = <1>;
+        zmp,pull = <0x01010010>;
+    };
+};

@@ -1,0 +1,104 @@
+/*
+ * ZMP110x SoC spi-nor node
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&spif0 {
+    
+    is25lp064: spi-norflash@0 { 
+        compatible = "issi,is25lp064";
+        norflash-name = "is25lp064";
+		reg = <0>;
+		
+		/* spiflash is25lp064 */
+        norflash-jedec-id = <0x9d6017>; 
+        norflash-ext-id = <0x0>;
+        norflash-sector-size = <0x10000>;
+        norflash-n-sectors = <128>; 
+
+		/**
+		*  flags:chip character bits:
+		*  bit 0: under_protect flag; bit 1: fast read flag; bit 2: AAI flag; bit 3: support status2; bit 4: support dual io read; bit 5: support dual read
+		*  bit 6: support quad io read; bit 7: support quad read; bit 8: support dual io write; bit 9: support dual write; bit 10: support quad io write
+		*  bit 11: support quad write; bit 12: support 4k erase sector; bit 13: support status3; bit 14: support no QE ; bit 15:write status mode 
+		*/
+
+		/* 
+		*  flags = SFLAG_QUAD_WRITE | SFLAG_QUAD_READ
+		*  = 0x0880
+		*  wr_mode:
+		*	0:means one write status cmd can wirte all status regs; 1:means one write status cmd can only wirte one status reg
+		*  norflash-wr_flags: write wr startus regs count 
+		*/
+        norflash-flags = <0x0880>;
+		rd_status_cmd = <0x05>;
+		wr_status_cmd = <0x01>;
+		wr_mode = <1>;
+		norflash-wr_flags = <1>;
+
+		/* status reg bit map */
+        norflash-b-wip  = <0>;
+        norflash-b-wel  = <1>;
+        norflash-b-bp0  = <2>;
+        norflash-b-bp1  = <3>;
+        norflash-b-bp2  = <4>;
+        norflash-b-bp3  = <5>;
+        norflash-b-qe   = <6>;  
+        norflash-b-srp0 = <7>;
+
+        status = "disable";
+    };
+
+    is25lp0512: spi-norflash@1 { 
+        compatible = "issi,is25lp512";
+        norflash-name = "is25lp512";
+		reg = <1>;
+		
+		/* spiflash is25lp512 */
+        norflash-jedec-id = <0x9d601a>; 
+        norflash-ext-id = <0x0>;
+        norflash-sector-size = <0x10000>;
+        norflash-n-sectors = <1024>; 
+
+		/**
+		*  flags:chip character bits:
+		*  bit 0: under_protect flag; bit 1: fast read flag; bit 2: AAI flag; bit 3: support status2; bit 4: support dual io read; bit 5: support dual read
+		*  bit 6: support quad io read; bit 7: support quad read; bit 8: support dual io write; bit 9: support dual write; bit 10: support quad io write
+		*  bit 11: support quad write; bit 12: support 4k erase sector; bit 13: support status3; bit 14: support no QE ; bit 15:write status mode 
+		*/
+
+		/* 
+		*  flags = SFLAG_QUAD_WRITE | SFLAG_QUAD_READ
+		*  = 0x0880
+		*  wr_mode:
+		*	0:means one write status cmd can wirte all status regs; 1:means one write status cmd can only wirte one status reg
+		*  norflash-wr_flags: write wr startus regs count 
+		*/
+        norflash-flags = <0x0880>;
+		rd_status_cmd = <0x05>;
+		wr_status_cmd = <0x01>;
+		wr_mode = <1>;
+		norflash-wr_flags = <1>;
+
+		/* status reg bit map */
+        norflash-b-wip  = <0>;
+        norflash-b-wel  = <1>;
+        norflash-b-bp0  = <2>;
+        norflash-b-bp1  = <3>;
+        norflash-b-bp2  = <4>;
+        norflash-b-bp3  = <5>;
+        norflash-b-qe   = <6>;  
+        norflash-b-srp0 = <7>;
+
+        status = "disable";
+    };
+};

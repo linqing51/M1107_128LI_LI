@@ -1,0 +1,71 @@
+/*
+ * ZMP110x SoC spi-nand node
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&spif0 {
+    MX35LF1GE4AB: spi-nandflash@0 { 
+		compatible = "MXIC,MX35LF1GE4AB";
+		nandflash-name = "MX35LF1GE4AB";
+		
+		/* spiflash MX35LF1GE4AB */
+		nandflash-jedec-id = <0xc212c212>; 
+		nandflash-ext-id = <0>;
+		nandflash-page_size = <2048>;
+		nandflash-page_per_block = <64>;
+		nandflash-block_size = <0x20000>;
+		nandflash-n_blocks = <1024>;
+		nandflash-oob_size = <64>;		  
+		nandflash-oob_up_skiplen = <0>;
+		nandflash-oob_seglen = <12>;
+		nandflash-oob_down_skiplen = <4>;
+		nandflash-oob_seg_perpage = <4>;
+		nandflash-oob_vail_data_offset = <4>;
+
+		/*
+		* flags = SFLAG_DUAL_READ|SFLAG_QUAD_READ|SFLAG_QUAD_WRITE
+		* = 0x8A0
+		*/
+		nandflash-flags = <0x0>;
+
+		/* status reg bit map */
+		nandflash-b_wip = <0>;		
+		nandflash-b_wel = <1>;		
+		nandflash-b_efail = <2>;		
+		nandflash-b_pfail = <3>;		
+		nandflash-b_bp2 = <4>;		
+		nandflash-b_bp3 = <5>;		
+		nandflash-b_bp4 = <6>;		
+		nandflash-b_srp0 = <7>; 	
+		
+		nandflash-b_qe = <8>; 	
+		nandflash-b_srp1 = <9>;		
+		nandflash-b_lb = <10>;		
+
+		nandflash-b_cmp = <14>; 	
+		nandflash-b_sus = <15>; 		
+
+		/* bad block flag ops */
+		nandflash-badflag_offs = <0>;
+		nandflash-badflag_len = <1>;
+		
+		/*
+		 * 0x00000000:scan first one page
+		 * 0x00008000:scan first two page
+		 * 0x00010000:scan last  one page
+		 * 0x00018000:scan last  two page
+		 * 0x01000000:scan first and last page
+		 */
+		nandflash-badflag_option = <0x01000000>;
+		status = "disable";
+	};
+};

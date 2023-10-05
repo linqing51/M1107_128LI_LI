@@ -1,0 +1,102 @@
+/*
+ * zmp1106 chip dts
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "zmp110x_common.dtsi"
+
+/ {
+    compatible = "zlgmcu,zmp110x";
+
+	chosen {
+		/* No padding required - the uboot can do that. */
+		bootargs = "console=ttySAK0,115200";
+	};
+
+	cpus {
+	    #address-cells = <1>;
+	    #size-cells = <0>;
+
+	    cpu@0 {
+	        compatible = "arm, arm926ej-s";
+	        device_type = "cpu";
+	        reg = <0>;
+	        d-cache-line-size = <32>;  // 32 bytes
+	        i-cache-line-size = <32>;  // 32 bytes
+	        d-cache-size = <0x8000>;
+	        i-cache-size = <0x8000>;
+	        timebase-frequency = <0>;
+	        bus-frequency = <0>;
+	        clock-frequency = <0>;
+	    };
+	};
+
+    memory {
+	    device_type = "memory";
+	    reg = <0x80000000 0x04000000>;
+	};
+
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        cma_reserved: cma_reserved@83400000 {
+            compatible = "shared-dma-pool";
+            linux,cma-default;
+            reusable;
+            size = <0x800000>;
+            reg = <0x83400000 0x800000>;
+            status = "okay";
+        };
+
+        dma_reserved: dma_reserved@81400000 {
+            /*compatible = "shared-dma-pool";*/
+            /*linux,cma-default;*/
+            /*reusable;*/
+            size = <0x2000000>;
+            reg = <0x81400000 0x2000000>;
+            status = "okay";
+        };
+    };
+
+    ion {
+        compatible = "zlgmcu,zmp110x-ion-reserve";
+        memory-region = <&cma_reserved>, <&dma_reserved>;
+        #address-cells = <1>;
+        #size-cells = <1>;
+        heaps-nr = <2>;
+        ranges;
+
+        cma_reserved_heap: cma_reserved_heap {
+            compatible = "zlgmcu,cma-reserve";
+            ion-id = <0>;
+            /* ion-type: 0 = cma ; 1 = prereserved memory which kernel do not  aware of */
+            ion-type = <0>;
+            base-address = <0x83400000>;
+            size = <0x800000>;
+            align = <0x4>;
+            status = "okay";
+        };
+
+       dma_reserved_heap: dma_reserved_heap {
+            compatible = "zlgmcu,dma-reserve";
+            ion-id = <1>;
+            /* ion-type: 0 = cma ; 1 = prereserved memory which kernel do not  aware of */
+            ion-type = <1>;
+            base-address = <0x81400000>;
+            size = <0x2000000>;
+            align = <0x4>;
+            status = "okay";
+        };
+    };
+};

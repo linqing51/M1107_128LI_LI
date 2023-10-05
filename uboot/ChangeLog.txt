@@ -1,0 +1,41 @@
+# U-Boot 2013.10.0 #
+
+## 版本说明 V1.0.00 ##
+
+* 支持zmp1106 zmp1107芯片
+* 支持spiflash启动
+* 支持从以太网tftp、串口下载镜像和升级镜像
+* 支持uboot自升级
+* 支持NFS调试
+* 支持DTS，同内核共用一份dtb
+* 支持标准分区
+* 后续支持
+    1. _支持spinand_
+    2. _SPL分级加载_
+    3. _falcon快速启动_
+    4. 支持标准spi nand坏块管理算法驱动
+
+## 使用说明 ##
+
+    make distclean
+    make NAME_config #针对V500 spiflash的配置
+    make all
+
+
+## V1.0.01 ##
+
+git hash: a6f963ede0a1ad7218c39d29a9a41ab6692181bd
+【tf】支持访问tf卡fat分区，获取fat分区文件。eMMC暂不支持
+【spinand】支持spinand启动
+    1. _支持spinand_
+    2. _SPL分级加载_
+    3. _falcon快速启动_
+    4. 支持标准spi nand坏块管理算法驱动
+
+## V1.0.02 ##
+
+git hash: d8cc7b7cca50144fda639664fcb813f720d11626
+【flash】
+	【性能优化】配置spi-flash：使能四线读写
+	【新增功能】支持islp25q512：以切换bank的方式支持大于16MIB的flash
+	【功能调整】使用新mtd分区

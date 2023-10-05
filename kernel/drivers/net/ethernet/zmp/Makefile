@@ -1,0 +1,1 @@
+obj-$(CONFIG_NET_ZMP) += zmp_eth.o

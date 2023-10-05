@@ -1,0 +1,650 @@
+/*
+ * EPC1107-LI board common dts
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/dts-v1/;
+#include "zmp1107.dtsi"
+
+/ {
+	compatible = "zlgmcu,zmp110x";
+	model = "EPC1107-LI";
+	version = "V1.0.00";
+
+	ramdisk:ramdisk{
+		compatible = "zlgmcu,zmp110x-ramdisk";
+		memory-region = <&dma_reserved>;
+		status = "disable";
+	};
+
+	watchdog_gpio: watchdog_gpio {
+		compatible = "linux,wdt-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&watchdog_gpio_pins>;
+		gpios = <&gpio 3 GPIO_ACTIVE_LOW>;
+		hw_algo = "toggle";
+		hw_margin_ms = <1500>;
+		always-running;
+		status = "okay";
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+		beeper {
+			label = "beeper-pwm";
+			pwms = <&pwm4 0 400000 0>;
+			max-brightness = <255>;
+			status = "okay";
+		};
+	};
+
+	backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm3 0 250000 0>;
+		brightness-levels = <  0  20  20  21  21  22  22  23
+		                      23  24  24  25  25  26  26  27
+		                      27  28  28  29  29  30  30  31
+		                      31  32  32  33  33  34  34  35
+		                      35  36  36  37  37  38  38  39
+		                      40  41  42  43  44  45  46  47
+		                      48  49  50  51  52  53  54  55
+		                      56  57  58  59  60  61  62  63
+		                      64  65  66  67  68  69  70  71
+		                      72  73  74  75  76  77  78  79
+		                      80  81  82  83  84  85  86  87
+		                      88  89  90  91  92  93  94  95
+		                      96  97  98  99 100 101 102 103
+		                     104 105 106 107 108 109 110 111
+		                     112 113 114 115 116 117 118 119
+		                     120 121 122 123 124 125 126 127
+		                     128 129 130 131 132 133 134 135
+		                     136 137 138 139 140 141 142 143
+		                     144 145 146 147 148 149 150 151
+		                     152 153 154 155 156 157 158 159
+		                     160 161 162 163 164 165 166 167
+		                     168 169 170 171 172 173 174 175
+		                     176 177 178 179 180 181 182 183
+		                     184 185 186 187 188 189 190 191
+		                     192 193 194 195 196 197 198 199
+		                     200 201 202 203 204 205 206 207
+		                     208 209 210 211 212 213 214 215
+		                     216 217 218 219 220 221 222 223
+		                     224 225 226 227 228 229 230 231
+		                     232 233 234 235 236 237 238 239
+		                     240 241 242 243 244 245 246 247
+		                     248 249 250 251 252 253 254 255 >;
+		default-brightness-level = <200>;
+		status = "okay";
+	};
+};
+
+/*********************** EPC1107-LI On-Chip Peripherals ***********************/
+
+&dac {
+	/*
+	 * speak-down: speaker state, 0 = disable, 1 = enable
+	 * speak-gpios: speaker enable pin
+	 * speak-gpios-en: speaker enable level, 0 = low, 1 = high
+	 * linein-detect: 0 = disable, 1 = eanble
+	 * hp-mute: set headphone mute, 0 = disable, 1 = enable
+	 * hp-detect: detect headphone insert, 0 = disable, 1 = eanble
+	 */
+	// pinctrl-names = "default";
+	// pinctrl-0 = <&speak_pins>;
+	speak-down = <1>;
+	// speak-gpios = <&gpio 97 1>;
+	speak-gpios-en = <1>;
+	linein-detect = <0>;
+	hp-mute = <0>;
+	hp-detect = <0>;
+	status = "okay";
+};
+
+&encrypt{
+	/*
+	 * encrypt-mode: 0 = CRYPTO_SINGLE_GROUP_MODE ; 1 = CRYPTO_MULTI_GROUP_MODE
+	 */
+	encrypt-mode = <1>;
+	status = "okay";
+};
+
+&gui {
+	status = "okay";
+};
+
+&rtc {
+	/*
+	 * osc-select: choose time source,
+	 *            1 means INTERNAL RC OSC, 0 means EXTERNAL XTAL
+	 * adjust-time: when osc-select is set to 1,
+	 *            this option should be also set(basic unit: ms)
+	 */
+	osc-select = <1>;
+	// adjust-time = <120000>;
+	status = "okay";
+};
+
+&saradc{
+	/*
+	 * vref-select: SAR ADC VREF selection
+	 *            0 - To select AVCC 3.3V as VREF for SAR ADC.
+	 *            1 - To select 3.0V generated from BGR as VREF for SAR ADC.
+	 * battery-divider: BAT voltage divider divided by 2, 0 = disable, 1 = enable
+	 * sampling-num: sampling number, read the sampling data for N times
+	 *            and then calculate the average value. N ranges from 1 to 7.
+	 */
+	vref-select = <1>;
+	battery-divider = <1>;
+	sampling-num = <7>;
+	status = "okay";
+};
+
+&uart0 {
+  pinctrl-names = "default";
+  pinctrl-0 = <&uart0_pins>;
+  status = "okay";
+};
+
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1_pins &uart1_rs485dir_pins>;
+	dir-gpios = <&gpio 33 1>;
+	status = "okay";
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart2_pins &uart2_rs485dir_pins>;
+	dir-gpios = <&gpio 38 1>;
+	status = "okay";
+};
+
+&usb {
+	status = "okay";
+};
+
+&vdecoder {
+	status = "okay";
+};
+
+&vencoder {
+	status = "okay";
+};
+
+&watchdog {
+	/*
+	 * def_heartbeat: feed dog time, max time = 357s, default setting time = 10s.
+	 */
+	def_heartbeat = <10>;
+	status = "okay";
+};
+
+&pwm3 {
+	#pwm-cells = <3>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pwm3_pins>;
+	period-ns = <1000000>;
+	duty-ns = <1000000>;
+	pwm-enable = <1>;
+	status = "okay";
+};
+
+&pwm4 {
+	#pwm-cells = <3>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pwm4_pins>;
+	period-ns = <1000000>;
+	duty-ns = <500000>;
+	pwm-enable = <0>;
+	status = "okay";
+};
+
+/*********************** EPC1107-LI On-Board Peripherals **********************/
+
+&mmc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mci1_pins &sd_detect_pins>;
+	bus-width = <0x4>;
+	max-frequency = <120000000>;
+	detect-gpio = <&gpio 122 1>;
+	cap-sd-highspeed;
+	status = "okay";
+};
+
+&spi0 {
+	/*
+	 * spi-bus-frequency: SPI Bus frequency, maximun is 60M/s
+	 * cap-spi-highspeed: if defined, SPI support high speed mode.
+	                    spi-bus-frequency maximun become 80M/s
+	 */
+	spi-bus-frequency = <80000000>;
+	cap-spi-highspeed;
+	pinctrl-names = "default";
+	pinctrl-0 = <&spiflash_pins>;
+	cs-gpios = <&gpio 12 1>;
+	status = "okay";
+};
+
+&spif0 {
+	/*
+	 * bus-width: spi flash data bus width, default is 4 wire mode
+	 *           1 - means 1 wire mode.
+	 *           2 - means 2 wire mode
+	 *           4 - means 4 wire mode.
+	 */
+	compatible = "zlgmcu,zmp-spinand";
+	bus-width = <4>;
+	status = "okay";
+
+	F35SQA001G: spi-nandflash@1 {
+		compatible = "FORESEE,F35SQA001G";
+		nandflash-name = "F35SQA001G";
+
+		/* spiflash F35SQA001G */
+		nandflash-jedec-id = <0xcd7171cd>;
+		nandflash-ext-id = <0>;
+		nandflash-planecnt = <1>;
+		nandflash-page_size = <2048>;
+		nandflash-page_per_block = <64>;
+		nandflash-block_size = <0x20000>;
+		nandflash-n_blocks = <1024>;
+		nandflash-oob_size = <64>;
+
+		nandflash-oob_up_skiplen = <0>;
+		nandflash-oob_seglen = <12>;
+		nandflash-oob_down_skiplen = <4>;
+
+		nandflash-oob_seg_perpage = <4>;
+		nandflash-oob_vail_data_offset = <8>;
+
+		/*
+		* flags = SFLAG_DUAL_READ|SFLAG_QUAD_READ|SFLAG_QUAD_WRITE
+		* = 0x8A0
+		*/
+		nandflash-flags = <0x8A0>;
+		nandflash-b_wip = <0>;
+		nandflash-b_wel = <1>;
+		nandflash-b_efail = <2>;
+		nandflash-b_pfaile = <3>;
+
+		nandflash-b_bp2 = <4>;              
+		nandflash-b_bp3 = <5>;                
+		nandflash-b_bp4 = <6>;                
+		nandflash-b_srp0 = <7>;         
+		nandflash-b_qe = <8>;         
+		nandflash-b_srp1 = <9>;                
+		nandflash-b_lb = <10>;                
+		nandflash-b_cmp = <14>;         
+		nandflash-b_sus = <15>;  
+
+		/* bad block flag ops */
+		nandflash-badflag_offs = <0>;
+		nandflash-badflag_len = <1>;
+
+		/*
+			* 0x00000000:scan first one page
+			* 0x00008000:scan first two page
+			* 0x00010000:scan last  one page
+			* 0x00018000:scan last  two page
+			* 0x01000000:scan first and last page
+			*/
+		nandflash-badflag_option = <0x00008000>;
+
+		status = "okay";
+    };
+};
+
+&i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+	clock-frequency = <100000>;
+	sda-delay = <100>;
+	status = "okay";
+	gpios = <&gpio 32 0 &gpio 31 0>; // sda, scl
+	i2c-gpio,sda-open-drain;
+	i2c-gpio,scl-open-drain;
+	i2c-gpio,delay-us = <2>; /* ~100 kHz */
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	ds2460: ds2460@40{
+		compatible = "zhiyuan,ds2460";
+		reg = <0x40>;
+	};
+
+	pcf85063: pcf85063@51 {
+		compatible = "nxp,pcf85063";
+		reg = <0x51>;
+		#clock-cells = <0>;
+	};
+};
+
+&i2c1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c1_pins>;
+	clock-frequency = <100000>;
+	sda-delay = <300>;
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	ft5336: ft5506@38 {
+		compatible = "ft,ft5x06_ts";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ft5x06_pins>;
+		interrupt-parent = <&gpio>;
+		interrupts = <98 2>;
+		reset-gpios = <&gpio 94 GPIO_ACTIVE_LOW>;
+		x_may = <480>;
+		y_max = <272>;
+		//wake-gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
+	};
+
+	bu21029: bu21029@40 {
+		pinctrl-names = "default";
+		pinctrl-0 = <&bu21029_pins>;
+		compatible = "rohm,bu21029";
+		reg = <0x40>;
+		interrupt-parent = <&gpio>;
+		interrupts = <97 2>;
+		reset-gpios = <&gpio 93 GPIO_ACTIVE_LOW>;
+		rohm,x-plate-ohms = <600>;
+		touchscreen-size-x = <480>;
+		touchscreen-size-y = <272>;
+		touchscreen-max-pressure = <4095>;
+	};
+
+	sensor0: camera@3c {
+		compatible = "zmp,sensor0";
+		reg = <0x3c>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&sensor0_pins>;
+		reset-gpio = <&gpio 92 1>;
+		pwdn-gpio = <&gpio 91 0>;
+		status = "okay";
+		port {
+			sensor0_0: endpoint@0 {
+				remote-endpoint = <&vi_0_0>;
+			};
+		};
+	};
+
+};
+
+&ethernet {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ethernet_pins_rmii &phy_reset_pins>;
+	reset-gpios = <&gpio 42 1>;
+	/* mac-address = [00 04 9F 01 1B B0]; */
+	status = "okay";
+};
+
+&lcdc {
+	/*
+	 * lcd-logo-width, lcd-logo-height: must match LCD panel resolution,
+	 *          if not, LCD Controller error occurred
+	 * lcd-logo-fmt0, lcd-logo-fmt1:
+	 *           [fmt1:fmt0] 00 16bits RGB565(BGR565)
+	 *           [fmt1:fmt0] 01 24bits RGB888(BGR888)
+	 *           [fmt1:fmt0] 1x 32bits ARGB888(ABGR888)
+	 *                                 RGBA888(BGRA888)
+	 * lcd-logo-rgb-seq: framebuffer sequence selection, 0 = BGR, 1 = RGB
+	 * lcd-rgb-bg-color: background color
+	 * lcd-fb-type: 0 = single buffer, 1 = double buffer
+	 */
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcd_pins &lcd_reset_pins>;
+	reset-pins = <&gpio 95 1>;
+	lcd-logo-width = <480>;
+	lcd-logo-height = <272>;
+	lcd-logo-fmt0 = <0>;
+	lcd-logo-fmt1 = <0>;
+	lcd-logo-rgb-seq = <1>;
+	lcd-rgb-bg-color = <0xffffffff>;
+	lcd-fb-type = <0>;
+	lcd-alarm-empty = <128>;
+	lcd-alarm-full = <510>;
+	lcd-dma-mode = <1>;
+	//lcd-dummy-seq = <0>; //for 8bit rgb panel set
+	//lcd-rgb-seq-sel = <0>;
+	//lcd-rgb-odd-seq = <0>;
+	//lcd-rgb-even-seq = <0>;
+	lcd-rgb-tpg-sel = <1>;
+	lcd-vpage-en = <0>; //don't support vpage function in driver
+	lcd-blank-sel = <0>;
+	lcd-pos-blank-level = <0>;
+	lcd-neg-blank-level = <0>;
+	lcd-rgb-bg-color = <0x00000000>;
+	lcd-vh-delay-en = <0>;
+	lcd-vh-delay-cycle = <0>;
+	lcd-v-unit = <0>;
+	lcd-alert-line = <30>;
+	status = "okay";
+
+	rk043fn02h: lcd-panel@1 { //for RGB panel setting
+		panel-if = <0>;
+		panel-rgb-seq = <1>;
+		panel-pclk-div = <49>;
+		panel-width = <480>;
+		panel-thpw = <41>;
+		panel-thb = <8>;
+		panel-thf = <4>;
+		panel-height = <272>;
+		panel-tvpw = <10>;
+		panel-tvb = <2>;
+		panel-tvf = <4>;
+		panel-pclk-pol = <0>; //0:pos, 1:neg
+		panel-hsync-pol = <0>;
+		panel-vsync-pol = <0>;
+		panel-vogate-pol = <0>;
+		panel-bus-width = <1>;
+		panel-sync-mode = <1>;
+		status = "okay";
+	};
+};
+
+&vi0{
+	pinctrl-names = "dvp0_12bits", "dvp0_10bits", "dvp0_8bits",
+		"mipi0_2lane", "mipi0_1lane", "mipi1_2lane", "mipi1_1lane",
+		"csi0_sclk", "csi1_sclk";
+	pinctrl-0 = <&dvp0_12bits_pins>;
+	pinctrl-1 = <&dvp0_10bits_pins>;
+	pinctrl-2 = <&dvp0_8bits_pins>;
+	pinctrl-3 = <&mipi0_2lane_pins>;
+	pinctrl-4 = <&mipi0_1lane_pins>;
+	pinctrl-5 = <&mipi1_2lane_pins>;
+	pinctrl-6 = <&mipi1_1lane_pins>;
+	pinctrl-7 = <&csi0_sclk_pin>;
+	pinctrl-8 = <&csi1_sclk_pin>;
+	status = "okay";
+	port@0 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		vi_0_0: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&sensor0_0>;
+		};
+	};
+};
+
+/************************** EPC1107-LI GPIO Settings **************************/
+&gpio {
+	/*
+	 * zmp,pins: pin number, refer to ZMP110X datasheet
+	 * zmp,function: pin multiplexing, refer to ZMP110X datasheet
+	 * zmp,pull: config pin electrical characteristics, 32bit number
+	 *  bit[31:24] --- slew rate, 0 = slow, 1 = fast
+	 *  bit[23:16] --- input enable, 0 = disable, 1 = enable
+	 *  bit[15:8]  --- drive strength, 4 levels value(0x00, 0x01, 0x02, 0x03)
+	 *  bit[7]     --- open drain, 0 = disable, 1 = enable (only for gpio 31/32)
+	 *  bit[6:4]   --- PUPD config, 1 = enable, 0 = disable
+	 *  bit[3:0]   --- 0 = select PU, 1 = select PD
+	 */
+	watchdog_gpio_pins: watchdog_gpio_pins {
+		zmp,pins = <3>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000010>;
+	};
+	pwm_gpio_backlight_pins: pwm_gpio_backlight_pins {
+		zmp,pins = <96>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000100>;
+	};
+	pwm_gpio_beep_pins: pwm_gpio_beep_pins {
+		zmp,pins = <25>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000310>;
+	};
+	uart0_pins: uart0_pins {
+		zmp,pins = <1 2>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010010>;
+	};
+	uart1_pins: uart1_pins {
+		zmp,pins = <36 37>;
+		zmp,function = <2 3>;
+		zmp,pull = <0x01010010 0x01010010>;
+	};
+	uart1_rs485dir_pins: uart1_rs485dir_pins {
+		zmp,pins = <33>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000311>;
+	};
+	uart2_pins: uart2_pins {
+		zmp,pins = <34 35>;
+		zmp,function = <2>;
+		zmp,pull = <0x01010010>;
+	};
+	pwm3_pins: pwm3_pins {
+		zmp,pins = <40>;
+		zmp,function = <2>;
+		zmp,pull = <0x01011110>;
+	};
+	pwm4_pins: pwm4_pins {
+		zmp,pins = <41>;
+		zmp,function = <2>;
+		zmp,pull = <0x01011110>;
+	};
+	uart2_rs485dir_pins: uart2_rs485dir_pins {
+		zmp,pins = <38>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000311>;
+	};
+	mci1_pins: mci1_pins {
+		zmp,pins = <43 44 45 46 47 48>;
+		zmp,function = <1>;
+		zmp,pull = <0x10010 0x10000 0x10010 0x10010 0x10010 0x10010>; /* 4 line */
+	};
+	sd_detect_pins: sd_detect_pins {
+		zmp,pins = <122>;
+		zmp,function = <0>;
+		zmp,pull = <0x01010010>;
+	};
+	spiflash_pins: spiflash_pins {
+		zmp,pins = <12 67 68 69 70>; // 4 LINE mode, 12 is spi nor cs
+		zmp,function = <1 0 0 0 0>;
+		zmp,pull = <0x01010010>;
+	};
+	i2c0_pins: i2c0_pins {
+		zmp,pins = <31 32>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010380>; // open drain
+	};
+	i2c1_pins: i2c1_pins {
+		zmp,pins = <27 28>;
+		zmp,function = <3>;
+		zmp,pull = <0x01010310>;
+	};
+	bu21029_pins: bu21029_pins {
+		zmp,pins = <93 97>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000010 0x01010010>;
+	};
+	ft5x06_pins: ft5x06_pins {
+		zmp,pins = <98 94>;
+		zmp,function = <0>;
+		zmp,pull = <0x01010000 0x01000110>;
+	};
+	ethernet_pins_rmii: ethernet_pins_rmii {
+		zmp,pins   = <10 11 13 14 15 19 20 23 24 49>;
+		zmp,function  = <1>;
+		zmp,pull = <0x01010011 0x01010010 0x01010011 0x01010011 0x01010011 0x01010011 0x01010011 0x01010011 0x01010011 0x01010110>;
+	};
+	phy_reset_pins: phy_reset_pins {
+		zmp,pins = <42>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000010>;
+	};
+	lcd_pins: lcd_pins {
+		zmp,pins = <71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010310>;
+	};
+	lcd_reset_pins: lcd_reset_pins {
+		zmp,pins = <95>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000310>;
+	};
+
+	// Camera
+	dvp0_12bits_pins: dvp0_12bits_pins {
+		zmp,pins = <25 26 27 28 111 112 113 114 115 116 117 118 119 120 121 122>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010310>;
+	};
+	dvp0_10bits_pins: dvp0_10bits_pins {
+		zmp,pins = <25 26 27 28 111 112 113 114 115 116 117 118 119 120 121 122>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010310>;
+	};
+	dvp0_8bits_pins: dvp0_8bits_pins {
+		zmp,pins = <25 26 27 28 111 112 113 114 115 116 117 118 119 120 121 122>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010310>;
+	};
+	mipi0_2lane_pins: mipi0_2lane_pins {
+		zmp,pins = <25 111 112 113 114 115 116>;
+		zmp,function = <1 2 2 2 2 2 2>;
+		zmp,pull = <0x01010310>;
+	};
+	mipi0_1lane_pins: mipi0_1lane_pins {
+		zmp,pins = <25 111 112 113 114>;
+		zmp,function = <1 2 2 2 2>;
+		zmp,pull = <0x01010310>;
+	};
+	mipi1_2lane_pins: mipi1_2lane_pins {
+		zmp,pins = <26 117 118 119 120 121 122>;
+		zmp,function = <1 2 2 2 2 2 2>;
+		zmp,pull = <0x01010310>;
+	};
+	mipi1_1lane_pins: mipi1_1lane_pins {
+		zmp,pins = <26 117 118 119 120>;
+		zmp,function = <1 2 2 2 2>;
+		zmp,pull = <0x01010310>;
+	};
+	csi0_sclk_pin: csi0_sclk_pin {
+		zmp,pins = <25>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010310>;
+	};
+	csi1_sclk_pin: csi1_sclk_pin {
+		zmp,pins = <26>;
+		zmp,function = <1>;
+		zmp,pull = <0x01010310>;
+	};
+	sensor0_pins: sensor0_pins {
+		zmp,pins = <91 92>;
+		zmp,function = <0>;
+		zmp,pull = <0x01000310 0x01000311>;
+	};
+};

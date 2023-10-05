@@ -1,0 +1,11 @@
+#
+# ZMP pinctrl drivers
+#
+config PINCTRL_ZMP110X
+	bool "ZMP110x GPIO (with PINCONF) driver"
+	depends on OF_GPIO && ARCH_ZMP
+	select GPIOLIB_IRQCHIP
+	select PINCONF
+	select PINMUX
+	help
+	  The ZMP110x Chip GPIO driver.
